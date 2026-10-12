@@ -106,6 +106,11 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 .trow:hover{background:var(--s2)}.trow>.i{color:var(--mut);width:16px;height:16px}
 .tname{flex:1;min-width:0;word-break:break-all}.tdir{color:var(--mut)}
 .trow .ib{width:28px;height:28px}
+.arow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 14px;background:var(--s1);border:1px solid var(--line);border-radius:14px;margin-bottom:8px}
+.arow .nm{flex:1;min-width:170px;font-weight:700}.arow .nm small{display:block;color:var(--mut);font-weight:400;font-size:12px}
+.arow select{width:auto;padding:7px 10px}
+.btn.sm{padding:7px 12px;font-size:13px}.btn.dng{background:var(--danger)}
+.agrp{margin:18px 0 8px;font-size:17px;font-weight:800}
 </style>
 </head>
 <body>
@@ -126,8 +131,9 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 
 <header class="top">
   <div class="logo"><b><svg class="i"><use href="#i-code"/></svg></b>DevVault</div>
-  <span id="me" class="hidden" style="display:flex;gap:6px;align-items:center"><span class="av" id="av"></span><span id="un" class="un"></span>
+  <span id="me" class="hidden" style="display:flex;gap:6px;align-items:center"><span class="av" id="av"></span><span id="un" class="un"></span><span class="lang" id="roleTag"></span>
     <button class="ib" id="logout" title="Log out" aria-label="Log out"><svg class="i"><path d="M9 4.5H6A1.5 1.5 0 004.5 6v12A1.5 1.5 0 006 19.5h3M14 8l4 4-4 4M18 12H9"/></svg></button></span>
+  <button class="btn sec hidden" id="adminBtn" style="padding:7px 12px">Admin</button>
   <button class="ib" id="theme" title="Switch theme" aria-label="Switch theme">
     <svg class="i sun"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
     <svg class="i moon"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/></svg></button>
@@ -152,7 +158,7 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 
 <section id="verify" class="auth hidden" style="grid-template-columns:1fr">
   <div class="form"><div>
-    <h2>Waiting for approval</h2><p class="sub">Send this ID to the owner. Once they approve it, you can come in.</p>
+    <h2 id="vH">Waiting for approval</h2><p class="sub" id="vP">An admin needs to approve you. This page opens by itself once you are in.</p>
     <input id="myId" readonly onclick="this.select()">
     <button class="btn" id="resend">Copy my ID</button>
     <button class="btn sec" id="reloadBtn">Check again</button>
@@ -185,6 +191,11 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
   </section>
 </main>
 
+<main id="admin" class="wrap hidden" style="grid-template-columns:1fr">
+  <div class="hero"><div><h2>People and access</h2><p id="astat"></p></div></div>
+  <section id="aList"></section>
+</main>
+
 <dialog id="viewer">
   <div class="dh"><h2 id="vTitle"></h2><span class="lang" id="vLang"></span>
     <button class="ib" id="vCopy" title="Copy code" aria-label="Copy code"><svg class="i"><use href="#i-copy"/></svg></button>
@@ -199,7 +210,7 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 <script type="module">
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-app.js";
 import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-auth.js";
-import { getDatabase, ref, set, push, get, remove, query, orderByChild, limitToLast, onValue, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
+import { getDatabase, ref, set, push, get, remove, query, orderByChild, limitToLast, onValue, serverTimestamp, update, equalTo } from "https://www.gstatic.com/firebasejs/10.14.1/firebase-database.js";
 
 // ====== PASTE YOUR FIREBASE CONFIG HERE ======
 const firebaseConfig = {
@@ -223,7 +234,7 @@ const clean = n => n.replace(/[^\w.\-]+/g, "_").slice(0, 120) || "file";
 const fmt = s => s < 1024 ? s + " B" : s < 1048576 ? (s / 1024).toFixed(0) + " KB" : (s / 1048576).toFixed(1) + " MB";
 const hue = u => "hsl(" + ([...u].reduce((a, c) => a + c.charCodeAt(0), 0) * 47 % 360) + " 55% 46%)";
 const ago = t => { const s = (Date.now() - t) / 1000; return s < 60 ? "just now" : s < 3600 ? Math.floor(s / 60) + " min ago" : s < 86400 ? Math.floor(s / 3600) + " h ago" : new Date(t).toLocaleDateString() };
-const ERR = { "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account. Log in instead.", "auth/weak-password": "Use at least 6 characters.", "auth/invalid-email": "That email address doesn't look right.", "PERMISSION_DENIED": "Access denied. Ask the owner to add your email to the approved list." };
+const ERR = { "auth/invalid-credential": "Wrong email or password.", "auth/email-already-in-use": "That email already has an account. Log in instead.", "auth/weak-password": "Use at least 6 characters.", "auth/invalid-email": "That email address doesn't look right.", "PERMISSION_DENIED": "Access denied. Ask an admin." };
 const toast = (m, err) => { const t = h("div", "toast" + (err ? " err" : ""), m); $("toasts").append(t); setTimeout(() => t.remove(), err ? 6000 : 3000) };
 const fail = e => toast(ERR[e.code] || ERR[(e.message || "").match(/PERMISSION_DENIED/)?.[0]] || e.message || String(e), 1);
 const tray = label => { const r = h("div", "up", label), w = h("div", "pb"), b = h("i"); w.append(b); r.append(w); $("tray").append(r); return { set: p => b.style.width = p + "%", end: () => setTimeout(() => r.remove(), 700) } };
@@ -238,7 +249,9 @@ $("theme").onclick = () => setTheme(document.documentElement.dataset.theme === "
 // auth
 let mode = "login", unsub = null, ITEMS = [], flt = "all", qry = "";
 const toEmail = x => x.includes("@") ? x : x.toLowerCase() + "@devvault.local";
-const ready = () => !$("app").classList.contains("hidden");
+let ROLE = null, VIEW = "app", feedUnsub = null, roleUnsub = null, admUnsubs = [], ADM = { p: {}, r: {} };
+const canWrite = () => ROLE === "admin" || ROLE === "member";
+const ready = () => !$("app").classList.contains("hidden") && canWrite();
 const setMode = m => {
   mode = m; $("tLogin").classList.toggle("on", m === "login"); $("tReg").classList.toggle("on", m === "reg");
   $("aTitle").textContent = m === "login" ? "Welcome back" : "Join the vault";
@@ -256,18 +269,85 @@ $("authForm").onsubmit = async e => {
 $("logout").onclick = () => signOut(auth);
 $("resend").onclick = () => navigator.clipboard.writeText(auth.currentUser.uid).then(() => toast("ID copied"));
 $("reloadBtn").onclick = () => location.reload();
-const show = v => ["auth", "verify", "app"].forEach(n => $(n).classList.toggle("hidden", n !== v));
+const show = v => ["auth", "verify", "app", "admin"].forEach(n => $(n).classList.toggle("hidden", n !== v));
 
-onAuthStateChanged(auth, u => {
-  if (unsub) { unsub(); unsub = null }
+const stopFeed = () => { if (feedUnsub) { feedUnsub(); feedUnsub = null } };
+const stopAdmin = () => { admUnsubs.forEach(f => f()); admUnsubs = [] };
+function startFeed() {
+  if (feedUnsub) return;
+  feedUnsub = onValue(query(ref(db, "items"), orderByChild("created"), limitToLast(200)), s => {
+    const a = []; s.forEach(c => { a.push({ id: c.key, ...c.val() }) }); ITEMS = a.reverse(); show(VIEW); render(); renderAdmin();
+  }, () => {});
+}
+function applyRole() {
+  const admin = ROLE === "admin";
+  $("roleTag").textContent = ROLE; $("roleTag").classList.remove("hidden");
+  $("adminBtn").classList.toggle("hidden", !admin);
+  document.querySelector(".comp").classList.toggle("hidden", !canWrite());
+  $("app").style.gridTemplateColumns = canWrite() ? "" : "1fr";
+  if (admin && !admUnsubs.length) admUnsubs = [onValue(ref(db, "profiles"), s => { ADM.p = s.val() || {}; renderAdmin() }), onValue(ref(db, "roles"), s => { ADM.r = s.val() || {}; renderAdmin() })];
+  if (!admin) { stopAdmin(); VIEW = "app" }
+}
+$("adminBtn").onclick = () => { VIEW = VIEW === "admin" ? "app" : "admin"; $("adminBtn").textContent = VIEW === "admin" ? "Back to vault" : "Admin"; show(VIEW); renderAdmin() };
+
+onAuthStateChanged(auth, async u => {
+  stopFeed(); stopAdmin(); if (roleUnsub) { roleUnsub(); roleUnsub = null }
+  ROLE = null; VIEW = "app"; $("adminBtn").textContent = "Admin"; $("adminBtn").classList.add("hidden");
   $("me").classList.toggle("hidden", !u);
   if (!u) return show("auth");
-  $("av").textContent = u.email[0].toUpperCase(); $("av").style.background = hue(u.email); $("me").title = u.email; $("un").textContent = u.email.split("@")[0]; $("hello").textContent = "Hey, " + u.email.split("@")[0];
+  const name = u.email.split("@")[0];
+  $("av").textContent = u.email[0].toUpperCase(); $("av").style.background = hue(u.email); $("me").title = u.email; $("un").textContent = name; $("hello").textContent = "Hey, " + name;
   $("myId").value = u.uid; show("");
-  unsub = onValue(query(ref(db, "items"), orderByChild("created"), limitToLast(200)), s => {
-    const a = []; s.forEach(c => { a.push({ id: c.key, ...c.val() }) }); ITEMS = a.reverse(); show("app"); render();
+  try { const pr = ref(db, "profiles/" + u.uid); if (!(await get(pr)).exists()) await set(pr, { name, created: serverTimestamp() }) } catch {}
+  roleUnsub = onValue(ref(db, "roles/" + u.uid), s => {
+    ROLE = s.val();
+    if (!["admin", "member", "viewer"].includes(ROLE)) {
+      stopFeed(); stopAdmin(); $("roleTag").classList.add("hidden"); $("adminBtn").classList.add("hidden");
+      $("vH").textContent = ROLE === "blocked" ? "Access removed" : "Waiting for approval";
+      $("vP").textContent = ROLE === "blocked" ? "An admin has removed your access." : "An admin needs to approve you. This page opens by itself once you are in.";
+      return show("verify");
+    }
+    applyRole(); startFeed(); if (ITEMS.length) render();
   }, () => show("verify"));
 });
+
+// admin panel
+const ROLES = ["viewer", "member", "admin"];
+const roleSelect = v => { const x = h("select"); ROLES.forEach(o => { const op = h("option", "", o); op.value = o; x.append(op) }); x.value = v; return x };
+function renderAdmin() {
+  if (ROLE !== "admin") return;
+  const L = $("aList"); L.replaceChildren();
+  const me = auth.currentUser.uid, cnt = {}; ITEMS.forEach(i => cnt[i.uid] = (cnt[i.uid] || 0) + 1);
+  const ppl = Object.entries(ADM.p).map(([uid, p]) => ({ uid, name: p.name, created: p.created, role: ADM.r[uid] || null }));
+  const gr = [["Waiting for approval", ppl.filter(x => !x.role)], ["People with access", ppl.filter(x => ROLES.includes(x.role))], ["Blocked", ppl.filter(x => x.role === "blocked")]];
+  $("astat").textContent = `${gr[1][1].length} with access, ${gr[0][1].length} waiting, ${gr[2][1].length} blocked. Viewers can read, members can share, admins control everything.`;
+  for (const [t, list] of gr) { if (!list.length) continue; L.append(h("div", "agrp", t)); for (const x of list) L.append(personRow(x, x.uid === me, cnt[x.uid] || 0)) }
+  if (!ppl.length) L.append(h("div", "empty", "No one has signed in yet."));
+}
+function personRow(x, isMe, n) {
+  const r = h("div", "arow"), av = h("span", "av", (x.name || "?")[0].toUpperCase()), nm = h("div", "nm", x.name || "unknown");
+  av.style.background = hue(x.name || x.uid);
+  nm.append(h("small", "", (isMe ? "You. " : "") + x.uid.slice(0, 8) + "... " + (x.created ? "joined " + new Date(x.created).toLocaleDateString() : "") + (n ? ", " + n + " item" + (n > 1 ? "s" : "") : "")));
+  r.append(av, nm);
+  const setRole = v => set(ref(db, "roles/" + x.uid), v).catch(fail);
+  if (!x.role || x.role === "blocked") {
+    const sel = roleSelect("member"), b = h("button", "btn sm", x.role ? "Restore" : "Approve"); b.onclick = () => setRole(sel.value); r.append(sel, b);
+    if (!x.role) { const bl = h("button", "btn sm sec", "Block"); bl.onclick = () => setRole("blocked"); r.append(bl) }
+  } else {
+    const sel = roleSelect(x.role); sel.disabled = isMe; sel.onchange = () => setRole(sel.value); r.append(sel);
+    if (!isMe) { const rv = h("button", "btn sm sec", "Remove access"); rv.onclick = () => confirm("Remove access for " + x.name + "?") && setRole("blocked"); r.append(rv) }
+  }
+  if (!isMe) { const d = h("button", "btn sm dng", "Delete their items"); d.onclick = () => purge(x); r.append(d) }
+  return r;
+}
+async function purge(x) {
+  if (!confirm("Delete everything " + x.name + " shared? This can't be undone.")) return;
+  try {
+    const sn = await get(query(ref(db, "items"), orderByChild("uid"), equalTo(x.uid))), up = { ["filedata/" + x.uid]: null };
+    sn.forEach(c => { up["items/" + c.key] = null });
+    await update(ref(db), up); toast("Deleted.");
+  } catch (e) { fail(e) }
+}
 
 // feed
 const kindOf = i => i.kind === "paste" ? "code" : i.kind === "folder" ? "folder" : IMG.test(i.name) ? "image" : "file";
@@ -275,7 +355,7 @@ const act = (ic, label, fn, cls) => { const b = h("button", "ib " + (cls || ""))
 function render() {
   const L = $("list"); L.replaceChildren();
   const n = ITEMS.length, p = new Set(ITEMS.map(i => i.uid)).size;
-  $("hstat").textContent = n ? `${n} item${n > 1 ? "s" : ""} from ${p} ${p > 1 ? "people" : "person"} in the vault. Drop anything onto this page to add more.` : "The vault is empty. Drop a file or folder anywhere, or press Ctrl+V to paste code.";
+  $("hstat").textContent = n ? `${n} item${n > 1 ? "s" : ""} from ${p} ${p > 1 ? "people" : "person"} in the vault.${canWrite() ? " Drop anything onto this page to add more." : ""}` : "The vault is empty. Drop a file or folder anywhere, or press Ctrl+V to paste code.";
   document.querySelectorAll(".chip").forEach(b => { const c = b.dataset.f === "all" ? n : ITEMS.filter(i => kindOf(i) === b.dataset.f).length; b.textContent = b.dataset.l + (c ? " " + c : "") });
   const rows = ITEMS.filter(i => (flt === "all" || kindOf(i) === flt) && (!qry || (i.name + " " + i.user + " " + (i.content || "")).toLowerCase().includes(qry)));
   if (!rows.length) { const e = h("div", "empty"); e.append(h("strong", "", ITEMS.length ? "No matches" : "Nothing shared yet"), document.createTextNode(ITEMS.length ? "Try a different search or filter." : "Drop a file or folder, or press Ctrl+V to paste code.")); if (!ITEMS.length) e.insertAdjacentHTML("afterbegin", '<div class="vault">' + VAULT + '</div>'); L.append(e); return }
@@ -294,7 +374,7 @@ function render() {
     const a = h("div", "acts");
     if (k === "code") a.append(act("copy", "Copy code", () => navigator.clipboard.writeText(it.content).then(() => toast("Copied"))));
     else { if (box) a.append(act("chev", "Show files", () => toggleFolder(it, c, box), "chev")); if (k === "image") a.append(act("eye", "Preview", () => previewImage(it))); a.append(act("download", k === "folder" ? "Download .zip" : "Download", () => download(it))) }
-    if (it.uid === auth.currentUser.uid) a.append(act("trash", "Delete", async () => {
+    if (it.uid === auth.currentUser.uid || ROLE === "admin") a.append(act("trash", "Delete", async () => {
       if (!confirm("Delete this?")) return;
       try { if (k !== "code") await remove(ref(db, `filedata/${it.uid}/${it.id}`)); await remove(ref(db, "items/" + it.id)) } catch (x) { fail(x) }
     }, "del"));
