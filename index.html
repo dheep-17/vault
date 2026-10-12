@@ -101,7 +101,11 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 @media(max-width:900px){.vault{width:64px}.un{display:none}.hero{padding:18px}}
 .card.fold{cursor:pointer}
 .chev .i{transition:transform .2s}.card.open .chev .i{transform:rotate(180deg)}
-.tree{margin-top:10px;border-top:1px dashed var(--line);padding-top:6px;cursor:default}
+.tree{display:grid;grid-template-rows:0fr;transition:grid-template-rows .4s cubic-bezier(.2,.8,.2,1);cursor:default}
+.tree.open{grid-template-rows:1fr}.tin{overflow:hidden;min-height:0}
+.tin>.trow:first-child{margin-top:10px;border-top:1px dashed var(--line);border-radius:0 0 8px 8px;padding-top:9px}
+.trow.in{animation:rowIn .4s cubic-bezier(.2,.8,.2,1) both;animation-delay:calc(var(--i) * 40ms)}
+@keyframes rowIn{from{opacity:0;transform:translateX(-10px)}}
 .trow{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:8px;font-size:14px}
 .trow:hover{background:var(--s2)}.trow>.i{color:var(--mut);width:16px;height:16px}
 .tname{flex:1;min-width:0;word-break:break-all}.tdir{color:var(--mut)}
@@ -111,6 +115,19 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 .arow select{width:auto;padding:7px 10px}
 .btn.sm{padding:7px 12px;font-size:13px}.btn.dng{background:var(--danger)}
 .agrp{margin:18px 0 8px;font-size:17px;font-weight:800}
+.comp{max-height:calc(100vh - 104px);overflow:auto}
+.post{width:100%;padding:13px 16px;font-size:16px;justify-content:flex-start;box-shadow:0 8px 20px color-mix(in srgb,var(--ac) 35%,transparent)}
+.post span{flex:1;text-align:left}.post .chv{transition:transform .35s}.post[aria-expanded=true] .chv{transform:rotate(180deg)}
+.pmenu{display:grid;grid-template-rows:0fr;transition:grid-template-rows .45s cubic-bezier(.2,.8,.2,1)}.pmenu.open{grid-template-rows:1fr}
+.pin{overflow:hidden;min-height:0;display:grid;gap:6px}.pin>.pitem:first-child{margin-top:10px}
+.pitem{display:flex;align-items:center;gap:12px;width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:12px;background:var(--bg);text-align:left;opacity:0;transform:translateY(-10px);transition:opacity .3s,transform .35s cubic-bezier(.2,.8,.2,1),border-color .15s}
+.pmenu.open .pitem{opacity:1;transform:none}
+.pmenu.open .pitem:nth-child(1){transition-delay:.06s}.pmenu.open .pitem:nth-child(2){transition-delay:.12s}.pmenu.open .pitem:nth-child(3){transition-delay:.18s}.pmenu.open .pitem:nth-child(4){transition-delay:.24s}.pmenu.open .pitem:nth-child(5){transition-delay:.3s}
+.pitem:hover{border-color:color-mix(in srgb,var(--c) 60%,var(--line))}
+.pitem b{display:block;font-size:14.5px}.pitem small{color:var(--mut);font-size:12.5px}
+.pi{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c);flex:none}
+.k-zip{--c:#5fd68a}#pCodeBox{margin-top:14px}
+@media(max-width:900px){.comp{max-height:none}}
 </style>
 </head>
 <body>
@@ -126,6 +143,7 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6A1.5 1.5 0 0014 4.5H6A1.5 1.5 0 004.5 6v8A1.5 1.5 0 006 15.5h2.5"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
 <symbol id="i-chev" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></symbol>
+<symbol id="i-zip" viewBox="0 0 24 24"><path d="M5 4h14v4H5zM6 8v12h12V8M10 12h4"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 </defs></svg>
 
@@ -168,19 +186,25 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 <main id="app" class="wrap hidden">
   <div class="hero"><div><h2 id="hello"></h2><p id="hstat"></p></div><div class="vault" id="vaultArt"></div></div>
   <aside class="comp">
-    <div class="tabs"><button id="tCode" class="on">Paste code</button><button id="tFiles">Files and folders</button></div>
+    <button class="btn post" id="postBtn" aria-expanded="false" aria-controls="pmenu"><svg class="i"><use href="#i-upload"/></svg><span>Post</span><svg class="i chv"><use href="#i-chev"/></svg></button>
+    <div class="pmenu" id="pmenu" inert><div class="pin">
+      <button class="pitem k-file" data-pick="fileInput"><span class="pi"><svg class="i"><use href="#i-file"/></svg></span><span><b>File upload</b><small>Any file, up to 10 MB</small></span></button>
+      <button class="pitem k-folder" data-pick="folderInput"><span class="pi"><svg class="i"><use href="#i-folder"/></svg></span><span><b>Folder upload</b><small>Zipped in your browser</small></span></button>
+      <button class="pitem k-image" data-pick="imgInput"><span class="pi"><svg class="i"><use href="#i-image"/></svg></span><span><b>PNG and images</b><small>png, jpg, gif, webp</small></span></button>
+      <button class="pitem k-zip" data-pick="zipInput"><span class="pi"><svg class="i"><use href="#i-zip"/></svg></span><span><b>ZIP file</b><small>zip, rar, 7z, tar, gz</small></span></button>
+      <button class="pitem k-code" data-pick="codeInput"><span class="pi"><svg class="i"><use href="#i-code"/></svg></span><span><b>Code file</b><small>.py .java .js .html and more</small></span></button>
+    </div></div>
     <div id="pCodeBox">
       <div class="editor"><div class="eh"><span class="dots"><i></i><i></i><i></i></span><input id="pTitle" placeholder="File name, e.g. utils.py">
       <select id="pLang"><option value="auto">Detect language</option><option>python</option><option>java</option><option>javascript</option><option>typescript</option><option>html</option><option>css</option><option>c/c++</option><option>sql</option><option>bash</option><option>json</option></select>
       </div><textarea id="pCode" placeholder="Paste your code here" spellcheck="false"></textarea></div>
       <button class="btn" id="pasteBtn" style="margin-top:10px">Share code</button>
     </div>
-    <div id="pFilesBox" class="hidden">
-      <div class="dz" id="dz" tabindex="0"><svg class="i"><use href="#i-upload"/></svg><strong>Drop files or a folder</strong><span>zip, png, source files. Up to 10 MB each.</span></div>
-      <div class="two"><button class="btn sec" id="pickFiles">Choose files</button><button class="btn sec" id="pickFolder">Choose folder</button></div>
-      <input type="file" id="fileInput" multiple class="hidden"><input type="file" id="folderInput" webkitdirectory multiple class="hidden">
-    </div>
-    <p class="note">Press Ctrl+V anywhere on the page to paste code or a screenshot.</p>
+    <input type="file" id="fileInput" multiple class="hidden"><input type="file" id="folderInput" webkitdirectory multiple class="hidden">
+    <input type="file" id="imgInput" accept="image/png,image/jpeg,image/gif,image/webp" multiple class="hidden">
+    <input type="file" id="zipInput" accept=".zip,.rar,.7z,.tar,.gz,application/zip" multiple class="hidden">
+    <input type="file" id="codeInput" accept=".py,.java,.js,.ts,.html,.css,.c,.cpp,.h,.sql,.sh,.json,.md,.txt" multiple class="hidden">
+    <p class="note">Tip: drag anything onto the page, or press Ctrl+V to paste code or a screenshot.</p>
   </aside>
   <section>
     <div class="tools">
@@ -368,8 +392,9 @@ function render() {
     if (fc != null) m.append(h("span", "lang", fc + (fc === 1 ? " file" : " files")));
     if (k === "code" && it.language && it.language !== "auto") m.append(h("span", "lang", it.language));
     b.append(h("h3", "", it.name), m);
-    const box = k === "folder" ? h("div", "tree hidden") : null;
-    if (box) { b.append(box); box.onclick = e => e.stopPropagation(); c.classList.add("fold"); c.onclick = () => toggleFolder(it, c, box); if (OPEN.has(it.id)) { c.classList.add("open"); box.classList.remove("hidden"); renderTree(box, it); if (!TREES.has(it.id)) loadTree(it).then(render).catch(fail) } }
+    const box = k === "folder" ? h("div", "tree" + (OPEN.has(it.id) ? " open" : "")) : null;
+    if (box) box.append(h("div", "tin"));
+    if (box) { b.append(box); box.onclick = e => e.stopPropagation(); c.classList.add("fold"); c.onclick = () => toggleFolder(it, c, box); if (OPEN.has(it.id)) { c.classList.add("open"); renderTree(box, it); if (!TREES.has(it.id)) loadTree(it).then(render).catch(fail) } }
     if (k === "code") { b.append(h("pre", "pv", it.content.split("\n").slice(0, 4).join("\n"))); c.onclick = () => openCode(it) }
     const a = h("div", "acts");
     if (k === "code") a.append(act("copy", "Copy code", () => navigator.clipboard.writeText(it.content).then(() => toast("Copied"))));
@@ -390,16 +415,17 @@ function loadTree(it) {
   if (!P.has(it.id)) P.set(it.id, (async () => {
     const zip = await JSZip.loadAsync(await fetchBlob(it));
     const files = Object.values(zip.files).filter(f => !f.dir).map(f => ({ path: f.name, entry: f })).sort((a, b) => a.path.localeCompare(b.path));
-    TREES.set(it.id, { files });
+    TREES.set(it.id, { files, fresh: true });
   })().catch(e => { P.delete(it.id); throw e }));
   return P.get(it.id);
 }
-function renderTree(box, it) {
-  box.replaceChildren();
+function renderTree(box, it, anim) {
+  const tin = box.firstChild; tin.replaceChildren();
   const t = TREES.get(it.id);
-  if (!t) return box.append(h("div", "trow meta", "Opening folder..."));
-  if (!t.files.length) return box.append(h("div", "trow meta", "This folder is empty."));
-  for (const f of t.files) {
+  if (!t) return tin.append(h("div", "trow meta", "Opening folder..."));
+  if (t.fresh) { anim = true; t.fresh = false }
+  if (!t.files.length) return tin.append(h("div", "trow meta", "This folder is empty."));
+  t.files.forEach((f, i) => {
     const all = f.path.split("/"), parts = all.length > 1 ? all.slice(1) : all, name = parts.pop(), dir = parts.join("/");
     const row = h("div", "trow"), label = h("span", "tname");
     if (dir) label.append(h("span", "tdir", dir + "/"));
@@ -407,14 +433,15 @@ function renderTree(box, it) {
     row.append(ICON(IMG.test(name) ? "image" : "file"), label);
     if (IMG.test(name) || !BIN.test(name)) row.append(act("eye", IMG.test(name) ? "Preview" : "View", () => openEntry(f, name)));
     row.append(act("download", "Download", () => saveEntry(f, name)));
-    box.append(row);
-  }
+    if (anim) { row.classList.add("in"); row.style.setProperty("--i", i) }
+    tin.append(row);
+  });
 }
 function toggleFolder(it, card, box) {
   const open = !OPEN.has(it.id);
   open ? OPEN.add(it.id) : OPEN.delete(it.id);
-  card.classList.toggle("open", open); box.classList.toggle("hidden", !open);
-  if (open) { renderTree(box, it); if (!TREES.has(it.id)) loadTree(it).then(render).catch(e => { OPEN.delete(it.id); card.classList.remove("open"); box.classList.add("hidden"); fail(e) }) }
+  card.classList.toggle("open", open); box.classList.toggle("open", open);
+  if (open) { renderTree(box, it, true); if (!TREES.has(it.id)) loadTree(it).then(render).catch(e => { OPEN.delete(it.id); card.classList.remove("open"); box.classList.remove("open"); fail(e) }) }
 }
 async function openEntry(f, name) {
   try {
@@ -474,8 +501,12 @@ $("pasteBtn").onclick = async () => {
     $("pCode").value = ""; $("pTitle").value = ""; $("pLang").value = "auto"; toast("Code shared");
   } catch (e) { fail(e) }
 };
-const tab = f => { $("tCode").classList.toggle("on", !f); $("tFiles").classList.toggle("on", f); $("pCodeBox").classList.toggle("hidden", f); $("pFilesBox").classList.toggle("hidden", !f) };
-$("tCode").onclick = () => tab(false); $("tFiles").onclick = () => tab(true);
+// Post menu: each option opens the matching file picker
+const pm = $("pmenu");
+const closeMenu = () => { pm.classList.remove("open"); pm.inert = true; $("postBtn").setAttribute("aria-expanded", "false") };
+$("postBtn").onclick = () => { const o = !pm.classList.contains("open"); pm.classList.toggle("open", o); pm.inert = !o; $("postBtn").setAttribute("aria-expanded", String(o)) };
+document.querySelectorAll(".pitem").forEach(b => b.onclick = () => $(b.dataset.pick).click());
+["fileInput", "imgInput", "zipInput", "codeInput"].forEach(id => $(id).onchange = e => { [...e.target.files].forEach(f => enqueue(f, f.name, "file")); e.target.value = ""; closeMenu() });
 
 // files (stored as base64 chunks in the database)
 const b64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = () => rej(r.error); r.readAsDataURL(blob) });
@@ -510,10 +541,8 @@ async function download(it) {
     document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000);
   } catch (e) { fail(e) }
 }
-$("pickFiles").onclick = () => $("fileInput").click(); $("dz").onclick = () => $("fileInput").click(); $("pickFolder").onclick = () => $("folderInput").click();
-$("fileInput").onchange = e => { [...e.target.files].forEach(f => enqueue(f, f.name, "file")); e.target.value = "" };
 $("folderInput").onchange = e => {
-  const fs = [...e.target.files]; if (!fs.length) return;
+  const fs = [...e.target.files]; if (!fs.length) return; closeMenu();
   shareFolder(fs.map(f => ({ file: f, path: f.webkitRelativePath || f.name })), (fs[0].webkitRelativePath || "folder").split("/")[0]); e.target.value = "";
 };
 
@@ -538,7 +567,7 @@ addEventListener("paste", e => {
   const fs = [...(e.clipboardData.files || [])];
   if (fs.length) { e.preventDefault(); fs.forEach(f => enqueue(f, f.name === "image.png" ? "pasted-" + Date.now() + ".png" : f.name, "file")); return }
   const txt = e.clipboardData.getData("text");
-  if (txt) { e.preventDefault(); tab(false); $("pCode").value = txt; $("pCode").focus() }
+  if (txt) { e.preventDefault(); $("pCode").value = txt; $("pCode").focus() }
 });
 </script>
 </body>
