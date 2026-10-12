@@ -133,7 +133,7 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
   <div class="logo"><b><svg class="i"><use href="#i-code"/></svg></b>DevVault</div>
   <span id="me" class="hidden" style="display:flex;gap:6px;align-items:center"><span class="av" id="av"></span><span id="un" class="un"></span><span class="lang" id="roleTag"></span>
     <button class="ib" id="logout" title="Log out" aria-label="Log out"><svg class="i"><path d="M9 4.5H6A1.5 1.5 0 004.5 6v12A1.5 1.5 0 006 19.5h3M14 8l4 4-4 4M18 12H9"/></svg></button></span>
-  <button class="btn sec hidden" id="adminBtn" style="padding:7px 12px">Admin</button>
+  <button class="btn sec hidden" id="adminBtn" style="padding:7px 12px">Admin access</button>
   <button class="ib" id="theme" title="Switch theme" aria-label="Switch theme">
     <svg class="i sun"><circle cx="12" cy="12" r="4"/><path d="M12 2.5v2.5M12 19v2.5M2.5 12H5M19 12h2.5M5.3 5.3l1.8 1.8M16.9 16.9l1.8 1.8M5.3 18.7l1.8-1.8M16.9 7.1l1.8-1.8"/></svg>
     <svg class="i moon"><path d="M20 14.5A8 8 0 019.5 4a8 8 0 1010.5 10.5z"/></svg></button>
@@ -288,11 +288,11 @@ function applyRole() {
   if (admin && !admUnsubs.length) admUnsubs = [onValue(ref(db, "profiles"), s => { ADM.p = s.val() || {}; renderAdmin() }), onValue(ref(db, "roles"), s => { ADM.r = s.val() || {}; renderAdmin() })];
   if (!admin) { stopAdmin(); VIEW = "app" }
 }
-$("adminBtn").onclick = () => { VIEW = VIEW === "admin" ? "app" : "admin"; $("adminBtn").textContent = VIEW === "admin" ? "Back to vault" : "Admin"; show(VIEW); renderAdmin() };
+$("adminBtn").onclick = () => { VIEW = VIEW === "admin" ? "app" : "admin"; $("adminBtn").textContent = VIEW === "admin" ? "Back to vault" : "Admin access"; show(VIEW); renderAdmin() };
 
 onAuthStateChanged(auth, async u => {
   stopFeed(); stopAdmin(); if (roleUnsub) { roleUnsub(); roleUnsub = null }
-  ROLE = null; VIEW = "app"; $("adminBtn").textContent = "Admin"; $("adminBtn").classList.add("hidden");
+  ROLE = null; VIEW = "app"; $("adminBtn").textContent = "Admin access"; $("adminBtn").classList.add("hidden");
   $("me").classList.toggle("hidden", !u);
   if (!u) return show("auth");
   const name = u.email.split("@")[0];
