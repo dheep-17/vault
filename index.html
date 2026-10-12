@@ -128,6 +128,15 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 .pi{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c);flex:none}
 .k-zip{--c:#5fd68a}#pCodeBox{margin-top:14px}
 @media(max-width:900px){.comp{max-height:none}}
+
+/* The existing Post control lives in the top bar next to the profile. */
+.post-wrap{position:relative;display:flex;align-items:center;flex:0 0 auto}
+.post-wrap .post{width:auto;padding:8px 12px;font-size:14px}
+.post-wrap .post span{flex:0 0 auto;text-align:left}
+.post-wrap .pmenu{position:absolute;top:calc(100% + 8px);right:0;z-index:50;width:min(320px,calc(100vw - 24px));max-height:0;overflow:hidden;background:var(--s1);border:1px solid transparent;border-radius:14px;box-shadow:var(--sh);transition:max-height .3s ease,border-color .2s,padding .2s}
+.post-wrap .pmenu.open{max-height:440px;padding:10px;border-color:var(--line)}
+.post-wrap .pin>.pitem:first-child{margin-top:0}
+@media(max-width:520px){.post-wrap .post{padding:8px 10px}.post-wrap .post span{display:none}}
 </style>
 </head>
 <body>
@@ -149,6 +158,7 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 
 <header class="top">
   <div class="logo"><b><svg class="i"><use href="#i-code"/></svg></b>DevVault</div>
+  <div id="postDock" class="post-wrap hidden"></div>
   <span id="me" class="hidden" style="display:flex;gap:6px;align-items:center"><span class="av" id="av"></span><span id="un" class="un"></span><span class="lang" id="roleTag"></span>
     <button class="ib" id="logout" title="Log out" aria-label="Log out"><svg class="i"><path d="M9 4.5H6A1.5 1.5 0 004.5 6v12A1.5 1.5 0 006 19.5h3M14 8l4 4-4 4M18 12H9"/></svg></button></span>
   <button class="btn sec hidden" id="adminBtn" style="padding:7px 12px">Admin access</button>
@@ -293,7 +303,10 @@ $("authForm").onsubmit = async e => {
 $("logout").onclick = () => signOut(auth);
 $("resend").onclick = () => navigator.clipboard.writeText(auth.currentUser.uid).then(() => toast("ID copied"));
 $("reloadBtn").onclick = () => location.reload();
-const show = v => ["auth", "verify", "app", "admin"].forEach(n => $(n).classList.toggle("hidden", n !== v));
+const show = v => {
+  ["auth", "verify", "app", "admin"].forEach(n => $(n).classList.toggle("hidden", n !== v));
+  $("postDock").classList.toggle("hidden", v !== "app" || !canWrite());
+};
 
 const stopFeed = () => { if (feedUnsub) { feedUnsub(); feedUnsub = null } };
 const stopAdmin = () => { admUnsubs.forEach(f => f()); admUnsubs = [] };
@@ -503,6 +516,7 @@ $("pasteBtn").onclick = async () => {
 };
 // Post menu: each option opens the matching file picker
 const pm = $("pmenu");
+$("postDock").append($("postBtn"), pm);
 const closeMenu = () => { pm.classList.remove("open"); pm.inert = true; $("postBtn").setAttribute("aria-expanded", "false") };
 $("postBtn").onclick = () => { const o = !pm.classList.contains("open"); pm.classList.toggle("open", o); pm.inert = !o; $("postBtn").setAttribute("aria-expanded", String(o)) };
 document.querySelectorAll(".pitem").forEach(b => b.onclick = () => $(b.dataset.pick).click());
