@@ -99,6 +99,13 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 .editor textarea{border:0;border-radius:0;margin:0!important;min-height:210px;background:transparent}
 .card{box-shadow:inset 3px 0 0 var(--c)}
 @media(max-width:900px){.vault{width:64px}.un{display:none}.hero{padding:18px}}
+.card.fold{cursor:pointer}
+.chev .i{transition:transform .2s}.card.open .chev .i{transform:rotate(180deg)}
+.tree{margin-top:10px;border-top:1px dashed var(--line);padding-top:6px;cursor:default}
+.trow{display:flex;align-items:center;gap:8px;padding:4px 6px;border-radius:8px;font-size:14px}
+.trow:hover{background:var(--s2)}.trow>.i{color:var(--mut);width:16px;height:16px}
+.tname{flex:1;min-width:0;word-break:break-all}.tdir{color:var(--mut)}
+.trow .ib{width:28px;height:28px}
 </style>
 </head>
 <body>
@@ -113,6 +120,7 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 <symbol id="i-eye" viewBox="0 0 24 24"><path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/></symbol>
 <symbol id="i-copy" viewBox="0 0 24 24"><rect x="8.5" y="8.5" width="11" height="11" rx="2"/><path d="M15.5 8.5V6A1.5 1.5 0 0014 4.5H6A1.5 1.5 0 004.5 6v8A1.5 1.5 0 006 15.5h2.5"/></symbol>
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
+<symbol id="i-chev" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 </defs></svg>
 
@@ -276,12 +284,16 @@ function render() {
     t.append(ICON(k)); av.style.background = hue(it.user); who.append(av, it.user);
     m.append(who, h("span", "", ago(it.created)));
     if (it.size != null) m.append(h("span", "", fmt(it.size)));
+    const fc = k === "folder" ? (it.files ?? TREES.get(it.id)?.files.length) : null;
+    if (fc != null) m.append(h("span", "lang", fc + (fc === 1 ? " file" : " files")));
     if (k === "code" && it.language && it.language !== "auto") m.append(h("span", "lang", it.language));
     b.append(h("h3", "", it.name), m);
+    const box = k === "folder" ? h("div", "tree hidden") : null;
+    if (box) { b.append(box); box.onclick = e => e.stopPropagation(); c.classList.add("fold"); c.onclick = () => toggleFolder(it, c, box); if (OPEN.has(it.id)) { c.classList.add("open"); box.classList.remove("hidden"); renderTree(box, it); if (!TREES.has(it.id)) loadTree(it).then(render).catch(fail) } }
     if (k === "code") { b.append(h("pre", "pv", it.content.split("\n").slice(0, 4).join("\n"))); c.onclick = () => openCode(it) }
     const a = h("div", "acts");
     if (k === "code") a.append(act("copy", "Copy code", () => navigator.clipboard.writeText(it.content).then(() => toast("Copied"))));
-    else { if (k === "image") a.append(act("eye", "Preview", () => previewImage(it))); a.append(act("download", k === "folder" ? "Download .zip" : "Download", () => download(it))) }
+    else { if (box) a.append(act("chev", "Show files", () => toggleFolder(it, c, box), "chev")); if (k === "image") a.append(act("eye", "Preview", () => previewImage(it))); a.append(act("download", k === "folder" ? "Download .zip" : "Download", () => download(it))) }
     if (it.uid === auth.currentUser.uid) a.append(act("trash", "Delete", async () => {
       if (!confirm("Delete this?")) return;
       try { if (k !== "code") await remove(ref(db, `filedata/${it.uid}/${it.id}`)); await remove(ref(db, "items/" + it.id)) } catch (x) { fail(x) }
@@ -291,6 +303,57 @@ function render() {
 }
 $("q").oninput = e => { qry = e.target.value.trim().toLowerCase(); render() };
 document.querySelectorAll(".chip").forEach(b => b.onclick = () => { flt = b.dataset.f; document.querySelectorAll(".chip").forEach(x => x.classList.toggle("on", x === b)); render() });
+
+// folders: click a folder to list the files inside its zip
+const OPEN = new Set(), TREES = new Map(), P = new Map(), BIN = /\.(zip|pdf|exe|dll|so|bin|class|jar|ico|woff2?|ttf|mp[34]|mov|avi)$/i;
+function loadTree(it) {
+  if (!P.has(it.id)) P.set(it.id, (async () => {
+    const zip = await JSZip.loadAsync(await fetchBlob(it));
+    const files = Object.values(zip.files).filter(f => !f.dir).map(f => ({ path: f.name, entry: f })).sort((a, b) => a.path.localeCompare(b.path));
+    TREES.set(it.id, { files });
+  })().catch(e => { P.delete(it.id); throw e }));
+  return P.get(it.id);
+}
+function renderTree(box, it) {
+  box.replaceChildren();
+  const t = TREES.get(it.id);
+  if (!t) return box.append(h("div", "trow meta", "Opening folder..."));
+  if (!t.files.length) return box.append(h("div", "trow meta", "This folder is empty."));
+  for (const f of t.files) {
+    const all = f.path.split("/"), parts = all.length > 1 ? all.slice(1) : all, name = parts.pop(), dir = parts.join("/");
+    const row = h("div", "trow"), label = h("span", "tname");
+    if (dir) label.append(h("span", "tdir", dir + "/"));
+    label.append(name);
+    row.append(ICON(IMG.test(name) ? "image" : "file"), label);
+    if (IMG.test(name) || !BIN.test(name)) row.append(act("eye", IMG.test(name) ? "Preview" : "View", () => openEntry(f, name)));
+    row.append(act("download", "Download", () => saveEntry(f, name)));
+    box.append(row);
+  }
+}
+function toggleFolder(it, card, box) {
+  const open = !OPEN.has(it.id);
+  open ? OPEN.add(it.id) : OPEN.delete(it.id);
+  card.classList.toggle("open", open); box.classList.toggle("hidden", !open);
+  if (open) { renderTree(box, it); if (!TREES.has(it.id)) loadTree(it).then(render).catch(e => { OPEN.delete(it.id); card.classList.remove("open"); box.classList.add("hidden"); fail(e) }) }
+}
+async function openEntry(f, name) {
+  try {
+    if (IMG.test(name)) return showImage(new Blob([await f.entry.async("uint8array")], { type: mimeFor(name) }), name);
+    const text = await f.entry.async("string");
+    if (text.length > 300000) return toast("Too large to preview. Download it instead.", 1);
+    openCode({ name, content: text, language: EXT[name.split(".").pop().toLowerCase()] || "auto" });
+  } catch (e) { fail(e) }
+}
+async function saveEntry(f, name) {
+  try {
+    const url = URL.createObjectURL(new Blob([await f.entry.async("uint8array")], { type: mimeFor(name) })), a = h("a");
+    a.href = url; a.download = clean(name); document.body.append(a); a.click(); a.remove(); setTimeout(() => URL.revokeObjectURL(url), 10000);
+  } catch (e) { fail(e) }
+}
+function showImage(blob, name) {
+  $("vImg").src = URL.createObjectURL(blob); $("vImg").classList.remove("hidden"); $("vBox").classList.add("hidden"); $("vCopy").classList.add("hidden"); $("vLang").classList.add("hidden");
+  $("vTitle").textContent = name; $("viewer").showModal();
+}
 
 // viewer
 function highlight(code, lang) {
@@ -336,23 +399,25 @@ $("tCode").onclick = () => tab(false); $("tFiles").onclick = () => tab(true);
 
 // files (stored as base64 chunks in the database)
 const b64 = blob => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(String(r.result).split(",")[1] || ""); r.onerror = () => rej(r.error); r.readAsDataURL(blob) });
-async function uploadBlob(blob, name, kind) {
+async function uploadBlob(blob, name, kind, files) {
   if (blob.size > MAX) throw new Error(name + " is " + fmt(blob.size) + ". The limit is 10 MB.");
   const u = auth.currentUser, id = push(ref(db, "items")).key, t = tray(name);
   try {
     const b = await b64(blob), n = Math.ceil(b.length / CHUNK);
     for (let i = 0; i < n; i++) { await set(ref(db, `filedata/${u.uid}/${id}/c${String(i).padStart(3, "0")}`), b.slice(i * CHUNK, (i + 1) * CHUNK)); t.set(100 * (i + 1) / n) }
-    await set(ref(db, "items/" + id), { kind, name, size: blob.size, chunks: n, uid: u.uid, user: u.email.split("@")[0], created: serverTimestamp() });
+    const item = { kind, name, size: blob.size, chunks: n, uid: u.uid, user: u.email.split("@")[0], created: serverTimestamp() };
+    try { await set(ref(db, "items/" + id), files != null ? { ...item, files } : item) }
+    catch (e) { if (files == null) throw e; await set(ref(db, "items/" + id), item) }
     toast("Shared " + name);
   } catch (e) { await remove(ref(db, `filedata/${u.uid}/${id}`)).catch(() => {}); throw e } finally { t.end() }
 }
 let q = Promise.resolve();
-const enqueue = (blob, name, kind) => { q = q.then(() => uploadBlob(blob, name, kind)).catch(fail) };
+const enqueue = (blob, name, kind, files) => { q = q.then(() => uploadBlob(blob, name, kind, files)).catch(fail) };
 async function shareFolder(list, root) {
   const z = new JSZip(); let n = 0;
   for (const x of list) { if (JUNK.test(x.path)) continue; z.file(x.path, x.file); n++ }
   if (!n) return toast("Nothing to upload in that folder.", 1);
-  enqueue(await z.generateAsync({ type: "blob", compression: "DEFLATE" }), root + ".zip", "folder");
+  enqueue(await z.generateAsync({ type: "blob", compression: "DEFLATE" }), root + ".zip", "folder", n);
 }
 async function fetchBlob(it) {
   const v = (await get(ref(db, `filedata/${it.uid}/${it.id}`))).val() || {};
