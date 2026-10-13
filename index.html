@@ -128,37 +128,35 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 .pi{display:grid;place-items:center;width:38px;height:38px;border-radius:10px;background:color-mix(in srgb,var(--c) 18%,transparent);color:var(--c);flex:none}
 .k-zip{--c:#5fd68a}#pCodeBox{margin-top:14px}
 @media(max-width:900px){.comp{max-height:none}}
-
-/* The existing Post control lives in the top bar next to the profile. */
-.post-wrap{position:relative;display:flex;align-items:center;flex:0 0 auto}
-.post-wrap .post{width:auto;padding:8px 12px;font-size:14px}
-.post-wrap .post span{flex:0 0 auto;text-align:left}
-.post-wrap .pmenu{position:absolute;top:calc(100% + 8px);right:0;z-index:50;width:min(320px,calc(100vw - 24px));max-height:0;overflow:hidden;background:var(--s1);border:1px solid transparent;border-radius:14px;box-shadow:var(--sh);transition:max-height .3s ease,border-color .2s,padding .2s}
-.post-wrap .pmenu.open{max-height:440px;padding:10px;border-color:var(--line)}
+#me{padding:3px 4px;border:1px solid var(--line);border-radius:99px;background:var(--s1)}
+.post-wrap{position:relative;display:flex;align-items:center}
+.post-wrap .post{width:auto;padding:8px 14px;font-size:14px;border-radius:99px}.post-wrap .post span{flex:0 0 auto}
+.post-wrap .pmenu{display:block;position:absolute;top:calc(100% + 10px);right:0;z-index:50;width:min(330px,calc(100vw - 24px));padding:10px;background:var(--s1);border:1px solid var(--line);border-radius:16px;box-shadow:var(--sh);opacity:0;visibility:hidden;pointer-events:none;transform:translateY(-8px) scale(.98);transform-origin:top right;transition:opacity .2s,transform .3s cubic-bezier(.2,.8,.2,1),visibility .2s}
+.post-wrap .pmenu.open{opacity:1;visibility:visible;pointer-events:auto;transform:none}
 .post-wrap .pin>.pitem:first-child{margin-top:0}
-@media(max-width:520px){.post-wrap .post{padding:8px 10px}.post-wrap .post span{display:none}}
-
-/* Team Snippets replaces the left composer by default, while preserving the existing visual system. */
-.team-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:10px}
-.team-head h2{font-size:19px;letter-spacing:-.02em;margin:0;font-weight:800}
-.team-head .note{margin:3px 0 0}
-.team-snippet-list{display:grid;gap:9px;max-height:calc(100vh - 330px);overflow:auto;margin:12px 0}
-.snippet-row{min-width:0;padding:10px;border:1px solid var(--line);border-radius:12px;background:var(--bg);cursor:pointer;transition:border-color .15s,background .15s}
-.snippet-row:hover{border-color:color-mix(in srgb,var(--ac) 60%,var(--line));background:color-mix(in srgb,var(--s2) 45%,var(--bg))}
-.snippet-row-head{display:flex;align-items:center;gap:8px;min-width:0}
-.snippet-mark{display:grid;place-items:center;width:32px;height:32px;border-radius:9px;background:color-mix(in srgb,var(--ac) 18%,transparent);color:var(--ac);flex:none}
-.snippet-name{font-size:14px;font-weight:800;overflow-wrap:anywhere;flex:1;min-width:0}
-.snippet-meta{display:flex;align-items:center;gap:6px 10px;flex-wrap:wrap;color:var(--mut);font-size:12px;margin-top:6px}
-.snippet-preview{margin:8px 0 0;padding:8px;border-radius:8px;background:var(--s1);font:11.5px/1.5 "JetBrains Mono",monospace;color:var(--mut);white-space:pre;overflow:hidden;max-height:5.8em}
-.snippet-row-foot{display:flex;align-items:center;justify-content:space-between;gap:6px;margin-top:5px}
-.snippet-actions{display:flex;gap:2px}
-.snippet-empty{padding:22px 12px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:12px;font-size:13px}
-#pCodeBox:not(.hidden){border-top:1px solid var(--line);margin-top:14px;padding-top:14px}
-#snippetSearch{margin-bottom:0}
-.snippet-tabs{display:flex;gap:6px;margin-top:9px}
-.snippet-tabs .chip{flex:1;padding:6px 8px;font-size:12px}
+@media(max-width:600px){.post-wrap{position:static}.post-wrap .pmenu{left:12px;right:12px;width:auto}.post-wrap .post span{display:none}}
+.team-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}
+.team-head h2{margin:0;font-size:19px;letter-spacing:-.02em;font-weight:800}.team-head .note{margin:2px 0 0}
+.stabs{display:flex;gap:4px;padding:4px;background:var(--s2);border-radius:12px;margin:10px 0 12px}
+.stab{flex:1;padding:7px;border:0;border-radius:9px;background:transparent;color:var(--mut);font-weight:600;font-size:13px}
+.stab.on{background:var(--s1);color:var(--fg);box-shadow:0 1px 4px rgba(0,0,0,.2)}
+.comp .srch input{margin:0}
+.team-snippet-list{display:grid;gap:9px;max-height:calc(100vh - 430px);min-height:120px;overflow:auto;margin:0 -4px 12px;padding:2px 4px}
+.snippet-row{min-width:0;padding:11px;border:1px solid var(--line);border-radius:14px;background:var(--bg);cursor:pointer;transition:border-color .15s,transform .15s}
+.snippet-row:hover,.snippet-row:focus-visible{border-color:color-mix(in srgb,var(--ac) 65%,var(--line));transform:translateY(-1px)}
+.snippet-row-head{display:flex;align-items:center;gap:9px}
+.snippet-mark{display:grid;place-items:center;width:30px;height:30px;border-radius:9px;background:color-mix(in srgb,var(--ac) 18%,transparent);color:var(--ac);flex:none}
+.snippet-name{flex:1;min-width:0;font-weight:800;font-size:14px;overflow-wrap:anywhere}
+.snippet-actions{display:flex}.snippet-actions .ib{width:28px;height:28px}
+.snippet-meta{display:flex;flex-wrap:wrap;align-items:center;gap:3px 10px;color:var(--mut);font-size:12px;margin-top:6px}
+.snippet-preview{margin:8px 0 0;padding:8px 10px;border-radius:9px;background:var(--s1);font:11.5px/1.5 "JetBrains Mono",monospace;color:var(--mut);white-space:pre;overflow:hidden;max-height:5.8em}
+.snippet-empty{padding:26px 12px;text-align:center;color:var(--mut);border:1px dashed var(--line);border-radius:14px;font-size:13px}
+#pCodeBox:not(.hidden){margin-top:14px;padding-top:14px;border-top:1px solid var(--line);animation:pop .25s}
+.hpills{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}.hpills span{padding:4px 12px;border-radius:99px;background:rgba(255,255,255,.18);font-weight:700;font-size:13px}
+.day{margin:18px 2px 8px;font-weight:800;font-size:13px;color:var(--mut)}.day:first-child{margin-top:0}
+.tile img{width:100%;height:100%;object-fit:cover;border-radius:12px}
+.card{transition:border-color .15s,transform .15s}
 @media(max-width:900px){.team-snippet-list{max-height:420px}}
-
 </style>
 </head>
 <body>
@@ -175,21 +173,20 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 <symbol id="i-search" viewBox="0 0 24 24"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></symbol>
 <symbol id="i-chev" viewBox="0 0 24 24"><path d="M7 10l5 5 5-5"/></symbol>
 <symbol id="i-zip" viewBox="0 0 24 24"><path d="M5 4h14v4H5zM6 8v12h12V8M10 12h4"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></symbol>
 <symbol id="i-x" viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></symbol>
 </defs></svg>
 
 <header class="top">
   <div class="logo"><b><svg class="i"><use href="#i-code"/></svg></b>DevVault</div>
-  <div id="postDock" class="post-wrap hidden">
-    <button class="btn post" id="postBtn" aria-expanded="false" aria-controls="pmenu"><svg class="i"><use href="#i-upload"/></svg><span>Post</span><svg class="i chv"><use href="#i-chev"/></svg></button>
+  <div id="postDock" class="post-wrap hidden"><button class="btn post" id="postBtn" aria-expanded="false" aria-controls="pmenu"><svg class="i"><use href="#i-upload"/></svg><span>Post</span><svg class="i chv"><use href="#i-chev"/></svg></button>
     <div class="pmenu" id="pmenu" inert><div class="pin">
       <button class="pitem k-file" data-pick="fileInput"><span class="pi"><svg class="i"><use href="#i-file"/></svg></span><span><b>File upload</b><small>Any file, up to 10 MB</small></span></button>
       <button class="pitem k-folder" data-pick="folderInput"><span class="pi"><svg class="i"><use href="#i-folder"/></svg></span><span><b>Folder upload</b><small>Zipped in your browser</small></span></button>
       <button class="pitem k-image" data-pick="imgInput"><span class="pi"><svg class="i"><use href="#i-image"/></svg></span><span><b>PNG and images</b><small>png, jpg, gif, webp</small></span></button>
       <button class="pitem k-zip" data-pick="zipInput"><span class="pi"><svg class="i"><use href="#i-zip"/></svg></span><span><b>ZIP file</b><small>zip, rar, 7z, tar, gz</small></span></button>
       <button class="pitem k-code" data-pick="codeInput"><span class="pi"><svg class="i"><use href="#i-code"/></svg></span><span><b>Code file</b><small>.py .java .js .html and more</small></span></button>
-    </div></div>
-  </div>
+    </div></div></div>
   <span id="me" class="hidden" style="display:flex;gap:6px;align-items:center"><span class="av" id="av"></span><span id="un" class="un"></span><span class="lang" id="roleTag"></span>
     <button class="ib" id="logout" title="Log out" aria-label="Log out"><svg class="i"><path d="M9 4.5H6A1.5 1.5 0 004.5 6v12A1.5 1.5 0 006 19.5h3M14 8l4 4-4 4M18 12H9"/></svg></button></span>
   <button class="btn sec hidden" id="adminBtn" style="padding:7px 12px">Admin access</button>
@@ -225,22 +222,13 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
 </section>
 
 <main id="app" class="wrap hidden">
-  <div class="hero"><div><h2 id="hello"></h2><p id="hstat"></p></div><div class="vault" id="vaultArt"></div></div>
-  <aside class="comp" id="snippetSidebar">
-    <div class="team-head">
-      <div>
-        <h2>Team Snippets</h2>
-        <p class="note">Code shared by everyone</p>
-      </div>
-      <span class="lang" id="snippetCount">0</span>
-    </div>
-    <input id="snippetSearch" type="search" placeholder="Search team snippets..." aria-label="Search team snippets">
-    <div class="snippet-tabs" role="group" aria-label="Snippet scope">
-      <button class="chip on" id="snippetsAll" type="button">All snippets</button>
-      <button class="chip" id="snippetsMine" type="button">My snippets</button>
-    </div>
+  <div class="hero"><div><h2 id="hello"></h2><p id="hstat"></p><div class="hpills" id="hpills"></div></div><div class="vault" id="vaultArt"></div></div>
+  <aside class="comp">
+    <div class="team-head"><div><h2>Team Snippets</h2><p class="note">Code shared by everyone</p></div><span class="lang" id="snippetCount">0</span></div>
+    <div class="srch"><svg class="i"><use href="#i-search"/></svg><input id="snippetSearch" type="search" placeholder="Search snippets" aria-label="Search team snippets"></div>
+    <div class="stabs" role="group" aria-label="Snippet scope"><button class="stab on" id="snippetsAll" type="button">All snippets</button><button class="stab" id="snippetsMine" type="button">My snippets</button></div>
     <div id="snippetList" class="team-snippet-list"></div>
-    <button class="btn" id="newSnippetBtn" type="button">+ New snippet</button>
+    <button class="btn" id="newSnippetBtn" type="button"><svg class="i"><use href="#i-plus"/></svg><span>New snippet</span></button>
     <div id="pCodeBox" class="hidden">
       <div class="editor"><div class="eh"><span class="dots"><i></i><i></i><i></i></span><input id="pTitle" placeholder="File name, e.g. utils.py">
       <select id="pLang"><option value="auto">Detect language</option><option>python</option><option>java</option><option>javascript</option><option>typescript</option><option>html</option><option>css</option><option>c/c++</option><option>sql</option><option>bash</option><option>json</option></select>
@@ -252,7 +240,7 @@ body{background-image:radial-gradient(color-mix(in srgb,var(--fg) 9%,transparent
     <input type="file" id="imgInput" accept="image/png,image/jpeg,image/gif,image/webp" multiple class="hidden">
     <input type="file" id="zipInput" accept=".zip,.rar,.7z,.tar,.gz,application/zip" multiple class="hidden">
     <input type="file" id="codeInput" accept=".py,.java,.js,.ts,.html,.css,.c,.cpp,.h,.sql,.sh,.json,.md,.txt" multiple class="hidden">
-    <p class="note">Use <b>New snippet</b> to share code, or the top-bar Post button to upload files and folders.</p>
+    <p class="note">Use <b>Post</b> in the top bar for files and folders. Press <b>/</b> to search, or Ctrl+V to paste code or a screenshot.</p>
   </aside>
   <section>
     <div class="tools">
@@ -358,12 +346,11 @@ function applyRole() {
   const admin = ROLE === "admin";
   $("roleTag").textContent = ROLE; $("roleTag").classList.remove("hidden");
   $("adminBtn").classList.toggle("hidden", !admin);
-  document.querySelector(".comp").classList.remove("hidden");
-  $("newSnippetBtn").classList.toggle("hidden", !canWrite());
-  if (!canWrite()) { $("pCodeBox").classList.add("hidden"); $("newSnippetBtn").classList.add("hidden"); }
+  $("newSnippetBtn").classList.toggle("hidden", !canWrite()); if (!canWrite()) setSnippetEditor(false);
   $("app").style.gridTemplateColumns = "";
   if (admin && !admUnsubs.length) admUnsubs = [onValue(ref(db, "profiles"), s => { ADM.p = s.val() || {}; renderAdmin() }), onValue(ref(db, "roles"), s => { ADM.r = s.val() || {}; renderAdmin() })];
   if (!admin) { stopAdmin(); VIEW = "app" }
+  if (!$("app").classList.contains("hidden")) show(VIEW);
 }
 $("adminBtn").onclick = () => { VIEW = VIEW === "admin" ? "app" : "admin"; $("adminBtn").textContent = VIEW === "admin" ? "Back to vault" : "Admin access"; show(VIEW); renderAdmin() };
 
@@ -384,7 +371,7 @@ onAuthStateChanged(auth, async u => {
       $("vP").textContent = ROLE === "blocked" ? "An admin has removed your access." : "An admin needs to approve you. This page opens by itself once you are in.";
       return show("verify");
     }
-    applyRole(); startFeed(); if (ITEMS.length) { render(); renderTeamSnippets(); }
+    applyRole(); startFeed(); if (ITEMS.length) { render(); renderTeamSnippets() }
   }, () => show("verify"));
 });
 
@@ -429,43 +416,44 @@ async function purge(x) {
 // feed
 const kindOf = i => i.kind === "paste" ? "code" : i.kind === "folder" ? "folder" : IMG.test(i.name) ? "image" : "file";
 const act = (ic, label, fn, cls) => { const b = h("button", "ib " + (cls || "")); b.append(ICON(ic)); b.title = label; b.setAttribute("aria-label", label); b.onclick = e => { e.stopPropagation(); fn() }; return b };
+const THUMBS = new Map();
+async function thumb(it, tile) {
+  try {
+    if (!THUMBS.has(it.id)) THUMBS.set(it.id, URL.createObjectURL(await fetchBlob(it)));
+    const img = h("img"); img.src = THUMBS.get(it.id); img.alt = ""; tile.replaceChildren(img);
+  } catch {}
+}
+const dayLabel = t => { const d = new Date(t || Date.now()), n = new Date(); return d.toDateString() === n.toDateString() ? "Today" : d.toDateString() === new Date(n - 864e5).toDateString() ? "Yesterday" : d.toLocaleDateString(undefined, { month: "long", day: "numeric", year: "numeric" }) };
 function render() {
   const L = $("list"); L.replaceChildren();
-  const assets = ITEMS.filter(i => i.kind !== "paste");
-  const n = assets.length, people = new Set(assets.map(i => i.uid)).size;
-  const snippetTotal = ITEMS.filter(i => i.kind === "paste").length;
-  $("hstat").textContent = n
-    ? `${n} shared file${n > 1 ? "s" : ""} from ${people} ${people > 1 ? "people" : "person"}.${canWrite() ? " Drop files or folders onto this page to add more." : ""}`
-    : snippetTotal
-      ? "No files or folders shared yet. Your team's code snippets are in the left panel."
-      : "The vault is empty. Upload a file or folder, or share a snippet from the left panel.";
-  document.querySelectorAll(".tools .chip").forEach(b => {
-    const count = b.dataset.f === "all" ? n : assets.filter(i => kindOf(i) === b.dataset.f).length;
-    b.textContent = b.dataset.l + (count ? " " + count : "");
-  });
+  const assets = ITEMS.filter(i => i.kind !== "paste"), n = assets.length, snips = ITEMS.length - n, people = new Set(ITEMS.map(i => i.uid)).size;
+  $("hstat").textContent = ITEMS.length ? (canWrite() ? "Drop files or folders anywhere on the page to add more." : "You can browse everything your team shared.") : "The vault is empty. Upload a file or share a snippet to get started.";
+  const pl = (c, w, w2) => c + " " + (c === 1 ? w : w2 || w + "s");
+  $("hpills").replaceChildren(...[pl(n, "file"), pl(snips, "snippet"), pl(people, "person", "people")].map(x => h("span", "", x)));
+  document.querySelectorAll(".tools .chip").forEach(b => { const c = b.dataset.f === "all" ? n : assets.filter(i => kindOf(i) === b.dataset.f).length; b.textContent = b.dataset.l + (c ? " " + c : "") });
   const rows = assets.filter(i => (flt === "all" || kindOf(i) === flt) && (!qry || (i.name + " " + i.user).toLowerCase().includes(qry)));
   if (!rows.length) {
     const e = h("div", "empty");
-    const title = h("strong", "", assets.length ? "No matches" : "No shared files yet");
-    const message = assets.length ? "Try a different search or filter." : "Files, images and folders shared by your team will appear here.";
-    e.append(title, document.createTextNode(message));
-    if (!assets.length && !snippetTotal) e.insertAdjacentHTML("afterbegin", '<div class="vault">' + VAULT + '</div>');
+    e.append(h("strong", "", n ? "No matches" : "No shared files yet"), document.createTextNode(n ? "Try a different search or filter." : "Files, images and folders shared by your team will appear here."));
+    if (!ITEMS.length) e.insertAdjacentHTML("afterbegin", '<div class="vault">' + VAULT + '</div>');
     L.append(e); return;
   }
+  let last = "";
   for (const it of rows) {
+    const dl = dayLabel(it.created); if (dl !== last) { L.append(h("div", "day", dl)); last = dl }
     const k = kindOf(it), c = h("article", "card k-" + k), t = h("div", "tile"), b = h("div"), m = h("div", "meta"), who = h("span", "who"), av = h("span", "av", (it.user || "?")[0].toUpperCase());
-    t.append(ICON(k)); av.style.background = hue(it.user || "unknown"); who.append(av, it.user || "unknown");
+    t.append(ICON(k)); if (k === "image" && it.size != null && it.size <= 300000) thumb(it, t);
+    av.style.background = hue(it.user || "unknown"); who.append(av, it.user || "unknown");
     m.append(who, h("span", "", ago(it.created || Date.now())));
     if (it.size != null) m.append(h("span", "", fmt(it.size)));
     const fc = k === "folder" ? (it.files ?? TREES.get(it.id)?.files.length) : null;
     if (fc != null) m.append(h("span", "lang", fc + (fc === 1 ? " file" : " files")));
     b.append(h("h3", "", it.name), m);
     const box = k === "folder" ? h("div", "tree" + (OPEN.has(it.id) ? " open" : "")) : null;
-    if (box) box.append(h("div", "tin"));
     if (box) {
-      b.append(box); box.onclick = e => e.stopPropagation(); c.classList.add("fold");
+      box.append(h("div", "tin")); b.append(box); box.onclick = e => e.stopPropagation(); c.classList.add("fold");
       c.onclick = () => toggleFolder(it, c, box);
-      if (OPEN.has(it.id)) { c.classList.add("open"); renderTree(box, it); if (!TREES.has(it.id)) loadTree(it).then(render).catch(fail); }
+      if (OPEN.has(it.id)) { c.classList.add("open"); renderTree(box, it); if (!TREES.has(it.id)) loadTree(it).then(render).catch(fail) }
     }
     const a = h("div", "acts");
     if (box) a.append(act("chev", "Show files", () => toggleFolder(it, c, box), "chev"));
@@ -473,64 +461,50 @@ function render() {
     a.append(act("download", k === "folder" ? "Download .zip" : "Download", () => download(it)));
     if (it.uid === auth.currentUser.uid || ROLE === "admin") a.append(act("trash", "Delete", async () => {
       if (!confirm("Delete this?")) return;
-      try { await remove(ref(db, `filedata/${it.uid}/${it.id}`)); await remove(ref(db, "items/" + it.id)); }
-      catch (x) { fail(x); }
+      try { await remove(ref(db, `filedata/${it.uid}/${it.id}`)); await remove(ref(db, "items/" + it.id)) } catch (x) { fail(x) }
     }, "del"));
     c.append(t, b, a); L.append(c);
   }
 }
+$("q").oninput = e => { qry = e.target.value.trim().toLowerCase(); render() };
+document.querySelectorAll(".tools .chip").forEach(b => b.onclick = () => { flt = b.dataset.f; document.querySelectorAll(".tools .chip").forEach(x => x.classList.toggle("on", x === b)); render() });
+
+// Team Snippets (left panel)
 let snippetScope = "all";
-$("snippetsAll").onclick = () => {
-  snippetScope = "all";
-  $("snippetsAll").classList.add("on"); $("snippetsMine").classList.remove("on");
-  renderTeamSnippets();
-};
-$("snippetsMine").onclick = () => {
-  snippetScope = "mine";
-  $("snippetsMine").classList.add("on"); $("snippetsAll").classList.remove("on");
-  renderTeamSnippets();
-};
+const setScope = v => { snippetScope = v; $("snippetsAll").classList.toggle("on", v === "all"); $("snippetsMine").classList.toggle("on", v === "mine"); renderTeamSnippets() };
+$("snippetsAll").onclick = () => setScope("all"); $("snippetsMine").onclick = () => setScope("mine");
+$("snippetSearch").oninput = () => renderTeamSnippets();
 function renderTeamSnippets() {
-  const list = $("snippetList");
-  if (!list) return;
-  list.replaceChildren();
-  const allSnippets = ITEMS.filter(i => i.kind === "paste");
-  $("snippetCount").textContent = String(allSnippets.length);
-  const snippets = snippetScope === "mine" ? allSnippets.filter(i => auth.currentUser && i.uid === auth.currentUser.uid) : allSnippets;
-  const term = ($("snippetSearch").value || "").trim().toLowerCase();
-  const visible = snippets.filter(i => !term || `${i.name || ""} ${i.user || ""} ${i.language || ""} ${i.content || ""}`.toLowerCase().includes(term));
-  if (!visible.length) {
-    const emptyText = snippets.length
-      ? "No snippets match your search."
-      : snippetScope === "mine" ? "You haven't shared any snippets yet." : "No snippets shared yet. Create one to start your team's code library.";
-    list.append(h("div", "snippet-empty", emptyText));
-    return;
-  }
-  for (const it of visible) {
-    const row = h("article", "snippet-row"), head = h("div", "snippet-row-head"), mark = h("span", "snippet-mark"), name = h("div", "snippet-name", it.name || "untitled");
-    mark.append(ICON("code")); head.append(mark, name);
+  const list = $("snippetList"); list.replaceChildren();
+  const all = ITEMS.filter(i => i.kind === "paste"); $("snippetCount").textContent = all.length;
+  const me = auth.currentUser && auth.currentUser.uid, term = $("snippetSearch").value.trim().toLowerCase();
+  const rows = all.filter(i => (snippetScope === "all" || i.uid === me) && (!term || `${i.name} ${i.user} ${i.language || ""} ${i.content || ""}`.toLowerCase().includes(term)));
+  if (!rows.length) { list.append(h("div", "snippet-empty", all.length ? "No snippets match." : "No snippets yet. Share the first one.")); return }
+  for (const it of rows) {
+    const row = h("article", "snippet-row"), head = h("div", "snippet-row-head"), mark = h("span", "snippet-mark"), acts = h("div", "snippet-actions"), lines = (it.content || "").split("\n");
+    mark.append(ICON("code"));
+    acts.append(act("copy", "Copy code", () => navigator.clipboard.writeText(it.content || "").then(() => toast("Copied")).catch(fail)));
+    if (it.uid === me || ROLE === "admin") acts.append(act("trash", "Delete snippet", async () => {
+      if (!confirm("Delete this snippet?")) return;
+      try { await remove(ref(db, "items/" + it.id)); toast("Snippet deleted.") } catch (x) { fail(x) }
+    }, "del"));
+    head.append(mark, h("div", "snippet-name", it.name || "untitled"), acts);
     const meta = h("div", "snippet-meta");
-    meta.append(h("span", "", "by " + (it.user || "unknown")), h("span", "", ago(it.created || Date.now())));
+    meta.append(h("span", "", it.user || "unknown"), h("span", "", ago(it.created || Date.now())), h("span", "", lines.length + (lines.length === 1 ? " line" : " lines")));
     if (it.language && it.language !== "auto") meta.append(h("span", "lang", it.language));
-    const preview = h("pre", "snippet-preview", (it.content || "").split("\n").slice(0, 4).join("\n"));
-    const foot = h("div", "snippet-row-foot"), hint = h("span", "snippet-meta", "Click to open");
-    const actions = h("div", "snippet-actions");
-    actions.append(act("copy", "Copy code", () => navigator.clipboard.writeText(it.content || "").then(() => toast("Copied")).catch(fail)));
-    if (auth.currentUser && (it.uid === auth.currentUser.uid || ROLE === "admin")) {
-      actions.append(act("trash", "Delete snippet", async () => {
-        if (!confirm("Delete this snippet?")) return;
-        try { await remove(ref(db, "items/" + it.id)); toast("Snippet deleted."); }
-        catch (e) { fail(e); }
-      }, "del"));
-    }
-    foot.append(hint, actions);
-    row.append(head, meta, preview, foot);
-    row.onclick = () => openCode(it);
+    row.append(head, meta, h("pre", "snippet-preview", lines.slice(0, 4).join("\n")));
+    row.tabIndex = 0; row.setAttribute("role", "button");
+    row.onclick = () => openCode(it); row.onkeydown = e => { if (e.key === "Enter" && e.target === row) openCode(it) };
     list.append(row);
   }
 }
-$("q").oninput = e => { qry = e.target.value.trim().toLowerCase(); render() };
-document.querySelectorAll(".tools .chip").forEach(b => b.onclick = () => { flt = b.dataset.f; document.querySelectorAll(".tools .chip").forEach(x => x.classList.toggle("on", x === b)); render() });
+const setSnippetEditor = open => {
+  $("pCodeBox").classList.toggle("hidden", !open);
+  $("newSnippetBtn").querySelector("span").textContent = open ? "Close editor" : "New snippet";
+  if (open) { $("pTitle").focus(); $("pCodeBox").scrollIntoView({ block: "nearest", behavior: "smooth" }) }
+};
+$("newSnippetBtn").onclick = () => setSnippetEditor($("pCodeBox").classList.contains("hidden"));
+$("cancelSnippetBtn").onclick = () => setSnippetEditor(false);
 
 // folders: click a folder to list the files inside its zip
 const OPEN = new Set(), TREES = new Map(), P = new Map(), BIN = /\.(zip|pdf|exe|dll|so|bin|class|jar|ico|woff2?|ttf|mp[34]|mov|avi)$/i;
@@ -612,16 +586,6 @@ async function previewImage(it) {
 $("vClose").onclick = () => $("viewer").close();
 $("viewer").addEventListener("click", e => { if (e.target === $("viewer")) $("viewer").close() });
 
-// Team Snippets pane and the optional new-snippet editor.
-const setSnippetEditor = open => {
-  $("pCodeBox").classList.toggle("hidden", !open);
-  $("newSnippetBtn").textContent = open ? "New snippet" : "+ New snippet";
-  if (open) $("pTitle").focus();
-};
-$("newSnippetBtn").onclick = () => setSnippetEditor($("pCodeBox").classList.contains("hidden"));
-$("cancelSnippetBtn").onclick = () => setSnippetEditor(false);
-$("snippetSearch").oninput = renderTeamSnippets;
-
 // sharing code
 $("pTitle").oninput = e => { if ($("pLang").value === "auto") { const l = EXT[e.target.value.split(".").pop().toLowerCase()]; if (l) $("pLang").value = l } };
 $("pasteBtn").onclick = async () => {
@@ -639,6 +603,11 @@ const pm = $("pmenu");
 const closeMenu = () => { pm.classList.remove("open"); pm.inert = true; $("postBtn").setAttribute("aria-expanded", "false") };
 $("postBtn").onclick = () => { const o = !pm.classList.contains("open"); pm.classList.toggle("open", o); pm.inert = !o; $("postBtn").setAttribute("aria-expanded", String(o)) };
 document.querySelectorAll(".pitem").forEach(b => b.onclick = () => $(b.dataset.pick).click());
+addEventListener("click", e => { if (!e.target.closest("#postDock")) closeMenu() });
+addEventListener("keydown", e => {
+  if (e.key === "Escape") closeMenu();
+  if (e.key === "/" && !e.target.matches("input,textarea,select") && !$("app").classList.contains("hidden")) { e.preventDefault(); $("q").focus() }
+});
 ["fileInput", "imgInput", "zipInput", "codeInput"].forEach(id => $(id).onchange = e => { [...e.target.files].forEach(f => enqueue(f, f.name, "file")); e.target.value = ""; closeMenu() });
 
 // files (stored as base64 chunks in the database)
